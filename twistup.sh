@@ -13,6 +13,9 @@ DIRECTORY="$(dirname "$0")"
 
 function error {
   echo -e "\e[91m$1\e[39m"
+  if [ "$runmode" == 'gui' ];then
+    zenity --error --text="TwistUP error:\n$1" --no-wrap
+  fi
   exit 1
 }
 
@@ -26,7 +29,7 @@ if [ -z "$runmode" ];then
 fi
 
 if [ "$runmode" == 'gui' ] && [ ! -f '/usr/bin/yad' ];then
-  error "YAD is required but not installed. Please run sudo apt install yad in a terminal."
+  error "YAD is required but not installed. Please run 'sudo apt install yad' in a terminal."
 fi
 
 #ensure twistver exists
@@ -73,13 +76,14 @@ echo "Available new patch(es): $availablepatches"
 #get oldest patch to be applied first
 patch="$(echo "$availablepatches" | tail -1 )"
 
+#confirmation dialog
 if [ "$runmode" == 'cli-yes' ];then
   echo "This patch will be applied now: $patch"
 elif [ "$runmode" == 'gui' ];then
   echo "$availablepatches" | yad --title='Twister OS Patcher' --list --separator='\n' \
-    --text='The following TwisterOS patches are available for installation:' \
+    --text='The following TwisterOS patches are available:' \
     --window-icon="${DIRECTORY}/icons/logo.png" \
-    --column=Patch --no-headers --no-selection \
+    --column=Patch --no-headers --no-selection --borders=4 --buttons-layout=center --width=370 \
     --button="Install $patch now"!"${DIRECTORY}/icons/update-16.png"!'This may take a long time.:0' \
     --button="Later"!"${DIRECTORY}/icons/pause.png"!:1 || exit 0
 else
@@ -96,35 +100,40 @@ dashpatch="$(echo "$patch" | tr '.' '-')"
 
 #get URL to download
 URL="$(cat "${DIRECTORY}/URLs" | grep "$patch" | awk '{print $2}')"
+echo "URL is $URL"
 if [ -z "$URL" ];then
   error "Failed to determine URL to download patch ${patch}!"
 fi
 
-echo "Downloading $URL"
-
-rm ./*patchinstall.sh 2>/dev/null
-rm -r ./patch 2>/dev/null
+rm -f ./*patchinstall.sh 2>/dev/null
+rm -rf ./patch 2>/dev/null
+rm -f ./patch.run 2>/dev/null
 
 #support for .zip formats and .run formats
 if [[ "$URL" = *.run ]];then
-  wget "$URL" -O ./patch.run
-  ./patch.run
+  echo "Patch is in .run format."
+  script="cd "\""$DIRECTORY"\""
+    wget "\""$URL"\"" -O ./patch.run
+    chmod +x ./patch.run
+    ./patch.run"
 elif [[ "$URL" = *.zip ]];then
-  cd "$DIRECTORY"
-  wget "$URL" -O ./patch.zip
-  unzip ./patch.zip
-  rm ./patch.zip
-  chmod +x ./${dashpatch}patchinstall.sh
-  if [ "$runmode" == 'gui' ];then
-    x-terminal-emulator -e "bash -c '"./${dashpatch}patchinstall.sh"'"
-    #x-terminal-emulator -e "bash -c 'echo y | "./${dashpatch}patchinstall.sh"'"
-  else
-    #if already running in a terminal, don't open another terminal
-    ./${dashpatch}patchinstall.sh
-  fi
+  echo "Patch is in .run format."
+  script="cd "\""$DIRECTORY"\""
+    wget "\""$URL"\"" -O ./patch.zip
+    unzip ./patch.zip
+    rm ./patch.zip
+    chmod +x ./${dashpatch}patchinstall.sh
+    ./${dashpatch}patchinstall.sh"
 else
   error "URL $URL does not end with .zip or .run!"
 fi
 
-
+if [ "$runmode" == 'gui' ];then
+  echo "Running in a terminal."
+  x-terminal-emulator -e /bin/bash -c "$script"
+  #x-terminal-emulator -e "bash -c 'echo y | "./${dashpatch}patchinstall.sh"'"
+else
+  #if already running in a terminal, don't open another terminal
+  bash -c "$script"
+fi
 
