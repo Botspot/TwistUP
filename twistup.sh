@@ -21,6 +21,12 @@ function error {
 
 cd "$DIRECTORY"
 
+#clean up old patches on exit
+trap "cd "\""$DIRECTORY"\""
+rm -f ./*patchinstall.sh 2>/dev/null
+rm -rf ./patch 2>/dev/null
+rm -f ./patch.run 2>/dev/null" EXIT
+
 #operation mode fo the whole script. Allowed values: gui, cli, cli-yes
 runmode="$1"
 
@@ -39,15 +45,15 @@ fi
 localversion="$(twistver | awk 'NF>1{print $NF}')"
 echo "current version: $localversion"
 
-patchlist="$(wget -qO- https://twisteros.com/Patches/latest.txt)"
-if [ $? != 0 ];then
+patchlist="$(wget -qO- https://raw.githubusercontent.com/Botspot/TwistUP/main/URLs)"
+if [ $? != 0 ] || [ -z "$patchlist" ];then
   error "Failed to download the patch list! Are you connected to the Internet?"
 fi
 #remove "Twister OS version " from each line in the patchlist
-patchlist="$(echo "$patchlist" | awk 'NF>1{print $NF}')"
-
+patchlist="$(echo "$patchlist" | awk '{print $1}')"
 #add local version to patch list in case local version is not mentioned in patch list
 patchlist="$(echo -e "${patchlist}\n${localversion}" | sort -r | uniq)"
+#echo "Patch list: $patchlist"
 
 #get the first line - that's the latest patch
 latestversion="$(echo "$patchlist" | head -n1)"
@@ -83,7 +89,7 @@ elif [ "$runmode" == 'gui' ];then
   echo "$availablepatches" | yad --title='Twister OS Patcher' --list --separator='\n' \
     --text='The following TwisterOS patches are available:' \
     --window-icon="${DIRECTORY}/icons/logo.png" \
-    --column=Patch --no-headers --no-selection --borders=4 --buttons-layout=center --width=370 \
+    --column=Patch --no-headers --no-selection --borders=4 --buttons-layout=spread --width=372 \
     --button="Install $patch now"!"${DIRECTORY}/icons/update-16.png"!'This may take a long time.:0' \
     --button="Later"!"${DIRECTORY}/icons/pause.png"!:1 || exit 0
 else
@@ -117,7 +123,7 @@ if [[ "$URL" = *.run ]];then
     chmod +x ./patch.run
     ./patch.run"
 elif [[ "$URL" = *.zip ]];then
-  echo "Patch is in .run format."
+  echo "Patch is in .zip format."
   script="cd "\""$DIRECTORY"\""
     wget "\""$URL"\"" -O ./patch.zip
     unzip ./patch.zip
@@ -136,4 +142,3 @@ else
   #if already running in a terminal, don't open another terminal
   bash -c "$script"
 fi
-
