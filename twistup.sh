@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# list of patch versions https://twisteros.com/Patches/latest.txt
-# version checker https://twisteros.com/Patches/checkversion.sh
-# simple bash updater script https://github.com/setLillie/Twister-OS-Patcher/blob/master/patch.sh
-# View everything under /Patches/ https://github.com/phoenixbyrd/TwisterOS/tree/master/Patches
+# list of patch versions: https://twisteros.com/Patches/latest.txt
+# version checker: https://twisteros.com/Patches/checkversion.sh
+# simple bash updater script: https://github.com/setLillie/Twister-OS-Patcher/blob/master/patch.sh
+# View everything under /Patches/: https://github.com/phoenixbyrd/TwisterOS/tree/master/Patches
+# file containing all the patch notes: https://twisteros.com/Patches/message.txt
 
-#example patch url https://twisteros.com/Patches/TwisterOSv1-9-1Patch.zip
+#example patch url: https://twisteros.com/Patches/TwisterOSv1-9-1Patch.zip
 
 #twistver format: "Twister OS version 1.8.5"
 
@@ -19,6 +20,128 @@ function error {
   exit 1
 }
 
+getchangelog() {
+  #downloads the changelog for a specified patch.
+  #usage: getchangelog 1.9.1
+  #outputs the full changelog in plain-text
+  messagetxt="$(wget -qO- https://twisteros.com/Patches/message.txt)"
+  changelog="$(echo "$messagetxt" | sed -e "0,/Version $1 patch notes:/d" | sed -e "/patch notes:/q" | head -n -2)"
+  firstline="$(echo "$messagetxt" | grep "Version $1 patch notes:")"
+  echo -e "${firstline}\n${changelog}"
+}
+
+showchangelog() {
+  #displays the changelog in a YAD window.
+  #usage: showchangelog 1.9.1
+  #does not produce any output.
+  getchangelog "$1" | yad --title="Changelog of $1" --text-info --wrap \
+    --center --width=700 --height=400 --fontname=12 \
+    --window-icon="${DIRECTORY}/icons/logo.png" \
+    --button="Back"!"${DIRECTORY}/icons/back.png":0
+}
+
+patch2url() {
+  #get URL to download, when given a patch number
+  #usage: patch2url 1.9.1
+  #outputs the full URL to the patch
+  URL="$(wget -qO- https://raw.githubusercontent.com/Botspot/TwistUP/main/URLs | grep "$1" | awk '{print $2}')"
+  if [ $? != 0 ] || [ -z "$URL" ];then
+    error "Failed to determine URL for patch ${1}!"
+  fi
+  echo "$URL"
+}
+
+patch2dash() {
+  #convert patch version from '1.9.1' to '1-9-1' format
+  echo "$1" | tr '.' '-'
+}
+
+update() {
+  #
+  
+  #what line in the text file is the current local patch version?
+  nextpatchnumber="$(echo "$patchlist" | grep -nx "$localversion" | cut -f1 -d:)"
+  if [ -z "$nextpatchnumber" ];then
+    error "Failed to determine the patch number!"
+  fi
+  #subtract 1 from it, to determine the line number for the next available patch
+  nextpatchnumber="$((nextpatchnumber-1))"
+
+  availablepatches="$(echo "$patchlist" | head -n "$nextpatchnumber")"
+  echo "Available new patch(es): $availablepatches"
+
+  #get oldest patch to be applied first
+  patch="$(echo "$availablepatches" | tail -1 )"
+
+  #confirmation dialog
+  if [ "$runmode" == 'cli-yes' ];then
+    echo "This patch will be applied now: $patch"
+  elif [ "$runmode" == 'gui' ];then
+    while true;do
+      echo "$availablepatches" | yad --title='Twister OS Patcher' --list --separator='\n' \
+        --text='The following Twister OS patches are available:' \
+        --window-icon="${DIRECTORY}/icons/logo.png" \
+        --column=Patch --no-headers --no-selection --borders=4 --text-align=left --buttons-layout=spread --width=372 \
+        --button="$patch Details"!"${DIRECTORY}/icons/info.png"!"View thge changelog of the $patch patch.":2 \
+        --button="Install $patch"!"${DIRECTORY}/icons/update.png"!'This may take a long time.:0' \
+        --button="Later"!"${DIRECTORY}/icons/pause.png":1
+      button=$?
+      if [ "$button" == 0 ];then
+        break #exit the loop and install the patch
+      elif [ "$button" == 2 ];then
+        #patch details
+        showchangelog "$patch"
+      else
+        #WM X , ESC, killed, etc.
+        exit 0
+      fi
+    done
+  else
+    #cli
+    echo -n "Apply the $patch now? This will take a while. [Y/n] "
+    read answer
+    if [ "$answer" == 'n' ];then
+      exit 0
+    fi
+  fi
+
+  dashpatch="$(patch2dash "$patch")"
+
+  URL="$(patch2url "$patch")"
+  #download
+  #support for .zip formats and .run formats
+  if [[ "$URL" = *.run ]];then
+    echo "Patch is in .run format."
+    rm -f ./patch.run 2>/dev/null
+    script="trap 'echo '\''Close this terminal to exit.'\'' ; sleep infinity' EXIT
+      cd "\""$DIRECTORY"\""
+      wget "\""$URL"\"" -O $(pwd)/patch.run
+      chmod +x $(pwd)/patch.run
+      $(pwd)/patch.run"
+  elif [[ "$URL" = *.zip ]];then
+    echo "Patch is in .zip format."
+    rm -f ./*patchinstall.sh 2>/dev/null
+    rm -rf ./patch 2>/dev/null
+    script="trap 'echo '\''Close this terminal to exit.'\'' ; sleep infinity' EXIT
+      cd "\""$DIRECTORY"\""
+      wget "\""$URL"\"" -O $(pwd)/patch.zip
+      unzip $(pwd)/patch.zip
+      rm $(pwd)/patch.zip
+      chmod +x $(pwd)/${dashpatch}patchinstall.sh
+      $(pwd)/${dashpatch}patchinstall.sh"
+  else
+    error "URL $URL does not end with .zip or .run!"
+  fi
+  #install
+  if [ "$runmode" == 'gui' ];then
+    echo "Running in a terminal."
+    x-terminal-emulator -e /bin/bash -c "$script"
+    #x-terminal-emulator -e "bash -c 'echo y | "./${dashpatch}patchinstall.sh"'"
+  else
+    #if already running in a terminal, don't open another terminal
+    bash -c "$script"
+  fi
+}
 cd "$DIRECTORY"
 
 #clean up old patches on exit
@@ -34,8 +157,11 @@ if [ -z "$runmode" ];then
   runmode=cli
 fi
 
+#ensure yad dialog is installed
 if [ "$runmode" == 'gui' ] && [ ! -f '/usr/bin/yad' ];then
   error "YAD is required but not installed. Please run 'sudo apt install yad' in a terminal."
+elif [ "$runmode" == 'gui' ] && [ -z "$DISPLAY" ];then
+  error "Are you in the console? You are trying to run this script in GUI mode, but the DISPLAY variable is not set."
 fi
 
 #ensure twistver exists
@@ -66,79 +192,8 @@ echo "latest version: $latestversion"
 if [ "$latestversion" == "$localversion" ];then
   echo -e "Your version of Twister OS is fully up to date already.\nExiting now."
   exit 0
-fi
-
-#what line in the text file is the current local patch version?
-nextpatchnumber="$(echo "$patchlist" | grep -nx "$localversion" | cut -f1 -d:)"
-if [ -z "$nextpatchnumber" ];then
-  error "Failed to determine the patch number!"
-fi
-#subtract 1 from it, to determine the line number for the next available patch
-nextpatchnumber="$((nextpatchnumber-1))"
-
-availablepatches="$(echo "$patchlist" | head -n "$nextpatchnumber")"
-echo "Available new patch(es): $availablepatches"
-
-#get oldest patch to be applied first
-patch="$(echo "$availablepatches" | tail -1 )"
-
-#confirmation dialog
-if [ "$runmode" == 'cli-yes' ];then
-  echo "This patch will be applied now: $patch"
-elif [ "$runmode" == 'gui' ];then
-  echo "$availablepatches" | yad --title='Twister OS Patcher' --list --separator='\n' \
-    --text='The following TwisterOS patches are available:' \
-    --window-icon="${DIRECTORY}/icons/logo.png" \
-    --column=Patch --no-headers --no-selection --borders=4 --buttons-layout=spread --width=372 \
-    --button="Install $patch now"!"${DIRECTORY}/icons/update-16.png"!'This may take a long time.:0' \
-    --button="Later"!"${DIRECTORY}/icons/pause.png"!:1 || exit 0
 else
-  #cli
-  echo -n "Apply the $patch now? This will take a while. [Y/n] "
-  read answer
-  if [ "$answer" == 'n' ];then
-    exit 0
-  fi
+  update
 fi
 
-#convert patch version from '1.9.1' to '1-9-1' format
-dashpatch="$(echo "$patch" | tr '.' '-')"
 
-#get URL to download
-URL="$(wget -qO- https://raw.githubusercontent.com/Botspot/TwistUP/main/URLs | grep "$patch" | awk '{print $2}')"
-if [ $? != 0 ] || [ -z "$URL" ];then
-  error "Failed to determine URL to download patch ${patch}!"
-fi
-echo "URL is $URL"
-
-rm -f ./*patchinstall.sh 2>/dev/null
-rm -rf ./patch 2>/dev/null
-rm -f ./patch.run 2>/dev/null
-
-#support for .zip formats and .run formats
-if [[ "$URL" = *.run ]];then
-  echo "Patch is in .run format."
-  script="cd "\""$DIRECTORY"\""
-    wget "\""$URL"\"" -O ./patch.run
-    chmod +x ./patch.run
-    ./patch.run"
-elif [[ "$URL" = *.zip ]];then
-  echo "Patch is in .zip format."
-  script="cd "\""$DIRECTORY"\""
-    wget "\""$URL"\"" -O ./patch.zip
-    unzip ./patch.zip
-    rm ./patch.zip
-    chmod +x ./${dashpatch}patchinstall.sh
-    ./${dashpatch}patchinstall.sh"
-else
-  error "URL $URL does not end with .zip or .run!"
-fi
-
-if [ "$runmode" == 'gui' ];then
-  echo "Running in a terminal."
-  x-terminal-emulator -e /bin/bash -c "$script"
-  #x-terminal-emulator -e "bash -c 'echo y | "./${dashpatch}patchinstall.sh"'"
-else
-  #if already running in a terminal, don't open another terminal
-  bash -c "$script"
-fi
