@@ -13,7 +13,7 @@ git clone https://github.com/Botspot/TwistUP
 ```
 ### CLI flags:
 ```
-#CLI mode
+#CLI mode (default)
 ~/TwistUP/twistup.sh cli
 #CLI mode, but it automatically applies the next patch without asking for confirmation
 ~/TwistUP/twistup.sh cli-yes
