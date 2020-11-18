@@ -68,7 +68,8 @@ update() {
   nextpatchnumber="$((nextpatchnumber-1))"
 
   availablepatches="$(echo "$patchlist" | head -n "$nextpatchnumber")"
-  echo "Available new patch(es): $availablepatches"
+  echo -n "Available new patch(es): $availablepatches" | tr '\n' ' '
+  echo ''
 
   #get oldest patch to be applied first
   patch="$(echo "$availablepatches" | tail -1 )"
@@ -98,7 +99,7 @@ update() {
     done
   else
     #cli
-    echo -n "Apply the $patch now? This will take a while. [Y/n] "
+    echo -n "Install the $patch patch now? This will take a while. [Y/n] "
     read answer
     if [ "$answer" == 'n' ];then
       exit 0
@@ -150,7 +151,7 @@ rm -f ./*patchinstall.sh 2>/dev/null
 rm -rf ./patch 2>/dev/null
 rm -f ./patch.run 2>/dev/null" EXIT
 
-#operation mode of the whole script. Allowed values: gui, cli, cli-yes
+#operation mode of the whole script. Allowed values: gui, gui-update, cli, cli-yes
 runmode="$1"
 
 if [ -z "$runmode" ];then
@@ -189,11 +190,16 @@ fi
 
 echo "latest version: $latestversion"
 
-if [ "$latestversion" == "$localversion" ];then
+if [ "$1" == 'gui-update' ] && [ "$latestversion" == "$localversion" ];then
   echo -e "Your version of Twister OS is fully up to date already.\nExiting now."
   exit 0
-else
+elif [ "$1" == 'gui-update' ] || [[ "$1" == cl* ]];then
   update
+  exit 0
 fi
 
+#main dialog displayed when there are no updates available
+#if [ "$1" == 'gui' ];then
+  
+#fi
 
