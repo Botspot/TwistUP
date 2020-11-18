@@ -27,7 +27,7 @@ rm -f ./*patchinstall.sh 2>/dev/null
 rm -rf ./patch 2>/dev/null
 rm -f ./patch.run 2>/dev/null" EXIT
 
-#operation mode fo the whole script. Allowed values: gui, cli, cli-yes
+#operation mode of the whole script. Allowed values: gui, cli, cli-yes
 runmode="$1"
 
 if [ -z "$runmode" ];then
@@ -49,7 +49,7 @@ patchlist="$(wget -qO- https://raw.githubusercontent.com/Botspot/TwistUP/main/UR
 if [ $? != 0 ] || [ -z "$patchlist" ];then
   error "Failed to download the patch list! Are you connected to the Internet?"
 fi
-#remove "Twister OS version " from each line in the patchlist
+#remove URLs from each line in the patchlist, only leave patch numbers
 patchlist="$(echo "$patchlist" | awk '{print $1}')"
 #add local version to patch list in case local version is not mentioned in patch list
 patchlist="$(echo -e "${patchlist}\n${localversion}" | sort -r | uniq)"
@@ -105,11 +105,11 @@ fi
 dashpatch="$(echo "$patch" | tr '.' '-')"
 
 #get URL to download
-URL="$(cat "${DIRECTORY}/URLs" | grep "$patch" | awk '{print $2}')"
-echo "URL is $URL"
-if [ -z "$URL" ];then
+URL="$(wget -qO- https://raw.githubusercontent.com/Botspot/TwistUP/main/URLs | grep "$patch" | awk '{print $2}')"
+if [ $? != 0 ] || [ -z "$URL" ];then
   error "Failed to determine URL to download patch ${patch}!"
 fi
+echo "URL is $URL"
 
 rm -f ./*patchinstall.sh 2>/dev/null
 rm -rf ./patch 2>/dev/null
