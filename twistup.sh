@@ -77,7 +77,7 @@ update() {
   #confirmation dialog
   if [ "$runmode" == 'cli-yes' ];then
     echo "This patch will be applied now: $patch"
-  elif [ "$runmode" == 'gui' ];then
+  elif [[ "$runmode" == gui* ]];then
     while true;do
       echo "$availablepatches" | yad --title='Twister OS Patcher' --list --separator='\n' \
         --text='The following Twister OS patches are available:' \
@@ -114,8 +114,7 @@ update() {
   if [[ "$URL" = *.run ]];then
     echo "Patch is in .run format."
     rm -f ./patch.run 2>/dev/null
-    script="trap 'echo '\''Close this terminal to exit.'\'' ; sleep infinity' EXIT
-      cd "\""$DIRECTORY"\""
+    script="cd "\""$DIRECTORY"\""
       wget "\""$URL"\"" -O $(pwd)/patch.run
       chmod +x $(pwd)/patch.run
       $(pwd)/patch.run"
@@ -123,8 +122,7 @@ update() {
     echo "Patch is in .zip format."
     rm -f ./*patchinstall.sh 2>/dev/null
     rm -rf ./patch 2>/dev/null
-    script="trap 'echo '\''Close this terminal to exit.'\'' ; sleep infinity' EXIT
-      cd "\""$DIRECTORY"\""
+    script="cd "\""$DIRECTORY"\""
       wget "\""$URL"\"" -O $(pwd)/patch.zip
       unzip $(pwd)/patch.zip
       rm $(pwd)/patch.zip
@@ -134,9 +132,10 @@ update() {
     error "URL $URL does not end with .zip or .run!"
   fi
   #install
-  if [ "$runmode" == 'gui' ];then
+  if [[ "$runmode" == gui* ]];then
     echo "Running in a terminal."
-    x-terminal-emulator -e /bin/bash -c "$script"
+    x-terminal-emulator -e /bin/bash -c "trap 'echo '\''Close this terminal to exit.'\'' ; sleep infinity' EXIT
+      $script"
     #x-terminal-emulator -e "bash -c 'echo y | "./${dashpatch}patchinstall.sh"'"
   else
     #if already running in a terminal, don't open another terminal
@@ -146,10 +145,10 @@ update() {
 cd "$DIRECTORY"
 
 #clean up old patches on exit
-trap "cd "\""$DIRECTORY"\""
+
 rm -f ./*patchinstall.sh 2>/dev/null
 rm -rf ./patch 2>/dev/null
-rm -f ./patch.run 2>/dev/null" EXIT
+rm -f ./patch.run 2>/dev/null
 
 #operation mode of the whole script. Allowed values: gui, gui-update, cli, cli-yes
 runmode="$1"
@@ -190,16 +189,33 @@ fi
 
 echo "latest version: $latestversion"
 
-if [ "$1" == 'gui-update' ] && [ "$latestversion" == "$localversion" ];then
+if [ "$1" != 'gui' ] && [ "$latestversion" == "$localversion" ];then
+  #no update available, and if any mode but gui
   echo -e "Your version of Twister OS is fully up to date already.\nExiting now."
   exit 0
-elif [ "$1" == 'gui-update' ] || [[ "$1" == cl* ]];then
+elif [ "$1" != 'gui' ] && [ "$latestversion" != "$localversion" ];then
+  #update is available, and if any mode but gui
   update
   exit 0
+elif [ "$1" == 'gui' ];then
+  #updates available or not, it doesn't matter. This will open the main dialog.
+  
+  if [ "$latestversion" != "$localversion" ];then
+    updatebutton="--button=See update:0"
+    updateline="--field=Update available!:LBL"
+  fi
+  
+  bodytext="--field=Current version: $localversion
+Latest version: $latestversion:LBL"
+  
+  yad --title='TwistUP' --form --separator='\n' \
+    --window-icon="${DIRECTORY}/icons/logo.png" \
+    --borders=4 --buttons-layout=spread --width=300 \
+    "$bodytext" \
+    "$updateline" \
+    "$updatebutton" \
+    --button="Close!${DIRECTORY}/icons/exit.png:1" || exit 0
+  update
 fi
 
-#main dialog displayed when there are no updates available
-#if [ "$1" == 'gui' ];then
-  
-#fi
 
