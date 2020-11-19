@@ -44,7 +44,7 @@ patch2url() {
   #get URL to download, when given a patch number
   #usage: patch2url 1.9.1
   #outputs the full URL to the patch
-  URL="$(wget -qO- https://raw.githubusercontent.com/Botspot/TwistUP/main/URLs | grep "$1" | awk '{print $2}')"
+  URL="$(wget -qO- https://twisteros.com/Patches/URLs | grep "$1" | awk '{print $2}')"
   if [ $? != 0 ] || [ -z "$URL" ];then
     error "Failed to determine URL for patch ${1}!"
   fi
@@ -171,7 +171,7 @@ fi
 localversion="$(twistver | awk 'NF>1{print $NF}')"
 echo "current version: $localversion"
 
-patchlist="$(wget -qO- https://raw.githubusercontent.com/Botspot/TwistUP/main/URLs)"
+patchlist="$(wget -qO- https://twisteros.com/Patches/URLs)"
 if [ $? != 0 ] || [ -z "$patchlist" ];then
   error "Failed to download the patch list! Are you connected to the Internet?"
 fi
@@ -203,6 +203,9 @@ elif [ "$1" == 'gui' ];then
   if [ "$latestversion" != "$localversion" ];then
     updatebutton="--button=See update:0"
     updateline="--field=Update available!:LBL"
+  else
+    updatebutton="--button=TwisterOS site:chromium-browser"
+    updateline="--field=You are up to date.:LBL"
   fi
   
   bodytext="--field=Current version: $localversion
