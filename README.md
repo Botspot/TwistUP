@@ -17,6 +17,8 @@ git clone https://github.com/Botspot/TwistUP
 ~/TwistUP/twistup.sh cli
 #CLI mode, but it automatically applies the next patch without asking for confirmation
 ~/TwistUP/twistup.sh cli-yes
-#GUI mode. Uses a YAD dialog to display available patches and asks for confirmation. Also, this version opens a new terminal to apply the updates.
+#Update mode. Uses a YAD dialog to display available patches and asks for confirmation. Also, this version opens a new terminal when installing a patch.
+~/TwistUP/twistup.sh gui-update
+#GUI mode. Uses a YAD dialog to display local version and latest version. If an update is available, this displays a Details button to install the patch.
 ~/TwistUP/twistup.sh gui
 ```
