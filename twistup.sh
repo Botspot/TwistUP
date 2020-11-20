@@ -105,29 +105,34 @@ update() {
       exit 0
     fi
   fi
-
+  
   dashpatch="$(patch2dash "$patch")"
-
+  
+  rm -f ./*patchinstall.sh 2>/dev/null
+  rm -rf ./patch 2>/dev/null
+  rm -f ./patch.run 2>/dev/null
+  
   URL="$(patch2url "$patch")"
   #download
   #support for .zip formats and .run formats
   if [[ "$URL" = *.run ]];then
     echo "Patch is in .run format."
     rm -f ./patch.run 2>/dev/null
-    script="cd "\""$DIRECTORY"\""
-      wget "\""$URL"\"" -O $(pwd)/patch.run
+    script="wget "\""$URL"\"" -O $(pwd)/patch.run
       chmod +x $(pwd)/patch.run
-      $(pwd)/patch.run"
+      $(pwd)/patch.run --noexec --target $(pwd)/patch
+      cat $(pwd)/patch/*patchinstall.sh | grep -vE 'reboot|sleep|restart|clear|seconds' > $(pwd)/patch/twistup-patchinstall.sh
+      chmod +x $(pwd)/patch/twistup-patchinstall.sh
+      $(pwd)/patch/twistup-patchinstall.sh"
   elif [[ "$URL" = *.zip ]];then
     echo "Patch is in .zip format."
     rm -f ./*patchinstall.sh 2>/dev/null
     rm -rf ./patch 2>/dev/null
-    script="cd "\""$DIRECTORY"\""
-      wget "\""$URL"\"" -O $(pwd)/patch.zip
+    script="wget "\""$URL"\"" -O $(pwd)/patch.zip
       unzip $(pwd)/patch.zip
       rm $(pwd)/patch.zip
-      chmod +x $(pwd)/${dashpatch}patchinstall.sh
-      $(pwd)/${dashpatch}patchinstall.sh"
+      chmod +x $(pwd)/*patchinstall.sh
+      $(pwd)/*patchinstall.sh"
   else
     error "URL $URL does not end with .zip or .run!"
   fi
@@ -135,16 +140,32 @@ update() {
   if [[ "$runmode" == gui* ]];then
     echo "Running in a terminal."
     x-terminal-emulator -e /bin/bash -c "trap 'echo '\''Close this terminal to exit.'\'' ; sleep infinity' EXIT
-      $script"
+      cd "\""$DIRECTORY"\""
+      $script
+      yad --title='Twister OS Patcher' \
+      --text="\""$patch patch complete. Reboot now?"\"" \
+      --window-icon="\""${DIRECTORY}/icons/logo.png"\"" \
+      --button="\""Reboot!${DIRECTORY}/icons/power.png"\"":0 \
+      --button="\""Later!${DIRECTORY}/icons/exit.png"\"":1 && sudo reboot"
     #x-terminal-emulator -e "bash -c 'echo y | "./${dashpatch}patchinstall.sh"'"
   else
-    #if already running in a terminal, don't open another terminal
+    #if already running in cli mode, don't open another terminal
     bash -c "$script"
+    #ask to reboot if cli mode
+    if [ "$runmode" == cli ];then
+      read -p "Would you like to reboot now? [Y/n] " answer
+      if [ "$answer" == 'n' ];then
+        exit 0
+      else
+        sudo reboot
+        exit 0
+      fi
+    fi
   fi
 }
 cd "$DIRECTORY"
 
-#clean up old patches on exit
+#clean up old patches
 
 rm -f ./*patchinstall.sh 2>/dev/null
 rm -rf ./patch 2>/dev/null
