@@ -123,6 +123,7 @@ update() {
       $(pwd)/patch.run --noexec --target $(pwd)/patch
       cat $(pwd)/patch/*patchinstall.sh | grep -vE 'reboot|sleep|restart|clear|seconds' > $(pwd)/patch/twistup-patchinstall.sh
       chmod +x $(pwd)/patch/twistup-patchinstall.sh
+      cd $(pwd)/patch/
       $(pwd)/patch/twistup-patchinstall.sh"
   elif [[ "$URL" = *.zip ]];then
     echo "Patch is in .zip format."
