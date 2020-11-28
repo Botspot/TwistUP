@@ -83,9 +83,9 @@ update() {
         --text='The following Twister OS patches are available:' \
         --window-icon="${DIRECTORY}/icons/logo.png" \
         --column=Patch --no-headers --no-selection --borders=4 --text-align=left --buttons-layout=spread --width=372 \
-        --button="$patch Details"!"${DIRECTORY}/icons/info.png"!"View thge changelog of the $patch patch.":2 \
+        --button="$patch Details"!"${DIRECTORY}/icons/info.png"!"View the changelog of the $patch patch.":2 \
         --button="Install $patch"!"${DIRECTORY}/icons/update.png"!'This may take a long time.:0' \
-        --button="Later"!"${DIRECTORY}/icons/pause.png":1
+        --button="Close!${DIRECTORY}/icons/exit.png:1"
       button=$?
       if [ "$button" == 0 ];then
         break #exit the loop and install the patch
@@ -93,13 +93,13 @@ update() {
         #patch details
         showchangelog "$patch"
       else
-        #WM X , ESC, killed, etc.
+        #WM X, ESC, killed, etc.
         exit 0
       fi
     done
   else
     #cli
-    echo -n "Install the $patch patch now? This will take a while. [Y/n] "
+    echo -n "Install the $patch patch now? This may take a while. [Y/n] "
     read answer
     if [ "$answer" == 'n' ];then
       exit 0
@@ -180,9 +180,9 @@ if [ -z "$runmode" ];then
 fi
 
 #ensure yad dialog is installed
-if [ "$runmode" == 'gui' ] && [ ! -f '/usr/bin/yad' ];then
+if [[ "$runmode" == gui* ]] && [ ! -f '/usr/bin/yad' ];then
   error "YAD is required but not installed. Please run 'sudo apt install yad' in a terminal."
-elif [ "$runmode" == 'gui' ] && [ -z "$DISPLAY" ];then
+elif [[ "$runmode" == gui* ]] && [ -z "$DISPLAY" ];then
   error "Are you in the console? You are trying to run this script in GUI mode, but the DISPLAY variable is not set."
 fi
 
@@ -211,14 +211,65 @@ fi
 
 echo "latest version: $latestversion"
 
-if [ "$1" != 'gui' ] && [ "$latestversion" == "$localversion" ];then
-  #no update available, and if any mode but gui
-  echo -e "Your version of Twister OS is fully up to date already.\nExiting now."
-  exit 0
-elif [ "$1" != 'gui' ] && [ "$latestversion" != "$localversion" ];then
-  #update is available, and if any mode but gui
-  update
-  exit 0
+if [[ "$1" == cli* ]] || [ "$1" == gui-update ] || [ -z "$1" ];then
+  if [ "$latestversion" == "$localversion" ];then
+    #no update available
+    echo -e "\nYour version of Twister OS is fully up to date already.\nExiting now."
+    exit 0
+  elif [ "$latestversion" != "$localversion" ];then
+    #update is available
+    update
+    exit 0
+  fi
+elif [ "$1" == 'gui-autostart' ] && [ "$latestversion" != "$localversion" ];then
+  nextcheck="$(cat "${DIRECTORY}/nextcheck")"
+  if [ -z $nextcheck ];then
+    echo "Warning: ${DIRECTORY}/nextcheck does not exist."
+    nextcheck=0
+  fi
+  
+  if [ "$nextcheck" == 'never' ];then
+    echo "${DIRECTORY}/nextcheck prevents TwistUP from ever checking for updates. Goodbye!"
+    exit 0
+  fi
+  
+  #update interval check
+  if [ ! "$(date +%j)" -ge "$nextcheck" ];then
+    #fix for the end of the year, and situations where nextcheck is 365+, but it's Jan 1st or later
+    if [ "$((nextcheck-7))" -gt "$(date +%j)" ];then
+      rm "${DIRECTORY}/nextcheck"
+    fi
+    echo "${DIRECTORY}/nextcheck says to skip update checks for today. Goodbye!"
+    exit 0
+  fi
+  
+  #update interval allows a dialog to open
+  screen_width="$(xdpyinfo | grep 'dimensions:' | tr 'x' '\n' | tr ' ' '\n' | sed -n 7p)"
+  screen_height="$(xdpyinfo | grep 'dimensions:' | tr 'x' '\n' | tr ' ' '\n' | sed -n 8p)"
+  
+  output="$(yad --form --text='Twister OS can be updated.' \
+    --on-top --skip-taskbar --undecorated --close-on-unfocus \
+    --geometry=260+$((screen_width-262))+$((screen_height-150)) \
+    --field="Never show this again:CHK" --image="${DIRECTORY}/icons/logo.png" \
+    --button="Details!${DIRECTORY}/icons/info.png":0 --button="Later!${DIRECTORY}/icons/exit.png!We"\'"ll remind you in a week.":2)"
+  button=$?
+  echo "output is '$output'"
+  
+  if [ $button == 0 ];then
+    update
+    exit 0
+  elif [ $button == 2 ];then
+    echo "$(($(date +%j)+7))" > "${DIRECTORY}/nextcheck"
+    if [[ "$output" == TRUE* ]];then
+      echo 'never' > "${DIRECTORY}/nextcheck"
+    fi
+    exit 0
+  else
+    if [[ "$output" == TRUE* ]];then
+      echo 'never' > "${DIRECTORY}/nextcheck"
+    fi
+    exit 0
+  fi
 elif [ "$1" == 'gui' ];then
   #updates available or not, it doesn't matter. This will open the main dialog.
   
