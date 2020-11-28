@@ -3,9 +3,14 @@
 AKA TwisterOS Patcher 2.0!
 ![](https://media.discordapp.net/attachments/738534235194916884/759921733825462322/TwisterOSPatcherLogo.png?width=960&height=186)<br>
 
-## To download: 
+## To download to the ~/TwistUP folder: 
 ```
 git clone https://github.com/Botspot/TwistUP
+```
+## To download to the ~/patcher folder:
+```
+gio trash ~/patcher
+git clone https://github.com/Botspot/TwistUP patcher
 ```
 ## To run:
 ```
