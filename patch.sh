@@ -10,8 +10,8 @@
 
 #twistver format: "Twister OS version 1.8.5"
 
-DIRECTORY="$(dirname "$0")"
-
+DIRECTORY="$(dirname "$(readlink -f "$0")")"
+echo "$DIRECTORY"
 function error {
   echo -e "\e[91m$1\e[39m"
   if [ "$runmode" == 'gui' ];then
@@ -186,6 +186,25 @@ elif [[ "$runmode" == gui* ]] && [ -z "$DISPLAY" ];then
   error "Are you in the console? You are trying to run this script in GUI mode, but the DISPLAY variable is not set."
 fi
 
+#create autostart file
+if [ ! -f ~/.config/autostart/twistup.desktop ];then
+  echo "[Desktop Entry]
+Type=Application
+Name=TwistUP
+Comment=Initial setup for Twister OS
+Exec=twistpatch gui-autostart
+OnlyShowIn=XFCE;
+StartupNotify=false
+Terminal=false
+Hidden=false" > ~/.config/autostart/twistup.desktop
+fi
+
+if [ "$(readlink -f /usr/local/bin/twistpatch)" == '/home/pi/patcher/src/start.sh' ] || [ ! -f /usr/local/bin/twistpatch ];then
+  echo "Created /usr/local/bin/twistpatch."
+  sudo rm -f /usr/local/bin/twistpatch 2>/dev/null
+  sudo ln -s "$0" /usr/local/bin/twistpatch
+fi
+
 #ensure twistver exists
 if [ ! -f /usr/local/bin/twistver ];then
   error "twistver not found!"
@@ -211,7 +230,12 @@ fi
 
 echo "latest version: $latestversion"
 
-if [[ "$1" == cli* ]] || [ "$1" == gui-update ] || [ -z "$1" ];then
+runmode="$1"
+if [ -z "$runmode" ];then
+  runmode=gui
+fi
+
+if [[ "$runmode" == cli* ]] || [ "$runmode" == gui-update ];then
   if [ "$latestversion" == "$localversion" ];then
     #no update available
     echo -e "\nYour version of Twister OS is fully up to date already.\nExiting now."
@@ -221,7 +245,7 @@ if [[ "$1" == cli* ]] || [ "$1" == gui-update ] || [ -z "$1" ];then
     update
     exit 0
   fi
-elif [ "$1" == 'gui-autostart' ] && [ "$latestversion" != "$localversion" ];then
+elif [ "$runmode" == 'gui-autostart' ] && [ "$latestversion" != "$localversion" ];then
   nextcheck="$(cat "${DIRECTORY}/nextcheck")"
   if [ -z $nextcheck ];then
     echo "Warning: ${DIRECTORY}/nextcheck does not exist."
@@ -260,17 +284,11 @@ elif [ "$1" == 'gui-autostart' ] && [ "$latestversion" != "$localversion" ];then
     exit 0
   elif [ $button == 2 ];then
     echo "$(($(date +%j)+7))" > "${DIRECTORY}/nextcheck"
-    if [[ "$output" == TRUE* ]];then
-      echo 'never' > "${DIRECTORY}/nextcheck"
-    fi
-    exit 0
-  else
-    if [[ "$output" == TRUE* ]];then
-      echo 'never' > "${DIRECTORY}/nextcheck"
-    fi
-    exit 0
   fi
-elif [ "$1" == 'gui' ];then
+  if [[ "$output" == TRUE* ]];then
+    echo 'never' > "${DIRECTORY}/nextcheck"
+  fi
+elif [ "$runmode" == 'gui' ];then
   #updates available or not, it doesn't matter. This will open the main dialog.
   
   if [ "$latestversion" != "$localversion" ];then
