@@ -22,13 +22,20 @@ Intended to be used in non-interactive scripts.
 ```
 ~/TwistUP/twistup.sh cli-yes
 ```
-# GUI Update mode. If any patches are availanble, it uses a YAD dialog to display available patches and asks for confirmation. Also, this version opens a new terminal when installing a patch.
-Intended to be run on boot.
+### GUI Update mode.
+If any patches are available, it uses a YAD dialog to display available patches and asks for confirmation. Also, this version opens a new terminal when installing a patch.  
 ```
 ~/TwistUP/twistup.sh gui-update
 ```
-# GUI mode. Uses a YAD dialog to display local version and latest version. If an update is available, this displays a Details button to install the patch.
+### GUI mode.
+Uses a YAD dialog to display local version and latest version. If an update is available, this displays a Details button to install the patch.
 Intended to be launched from the Menu.
 ```
 ~/TwistUP/twistup.sh gui
+```
+### GUI autostart mode.
+If updates are available, this displays a notification on the bottom-right of the screen to let you know.  
+This is run on start-up.
+```
+~/TwistUP/twistup.sh gui-autostart
 ```
