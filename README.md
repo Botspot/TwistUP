@@ -1,13 +1,13 @@
-# TwistUP (For TwisterOS)
+# TwistUP
 ## The new, simple Twister OS patcher
 AKA TwisterOS Patcher 2.0!
-![](https://media.discordapp.net/attachments/738534235194916884/759921733825462322/TwisterOSPatcherLogo.png?width=960&height=186)<br>
+![](https://media.discordapp.net/attachments/738534235194916884/759921733825462322/TwisterOSPatcherLogo.png?width=960&height=186)  
 
-## To download to the ~/TwistUP folder: 
+## To download to ~/TwistUP 
 ```
 git clone https://github.com/Botspot/TwistUP
 ```
-## To download to the ~/patcher folder:
+## To download to ~/patcher
 ```
 gio trash ~/patcher
 git clone https://github.com/Botspot/TwistUP patcher
@@ -17,30 +17,35 @@ git clone https://github.com/Botspot/TwistUP patcher
 ~/TwistUP/twistup.sh
 ```
 ## Flags:
-### Lists available patches and asks permission to update.
-Intended for users who prefer patching "manually".
+### Lists available patches in the terminal and asks permission to update.
+Intended **for users who prefer patching "manually"**.
 ```
 ~/TwistUP/twistup.sh cli
 ```
 ### Just like above, but automatically applies the patch.
-Intended to be used in non-interactive scripts.
+Intended to be **used in non-interactive scripts**.
 ```
 ~/TwistUP/twistup.sh cli-yes
 ```
 ### GUI Update mode.
-If any patches are available, it uses a YAD dialog to display available patches and asks for confirmation. Also, this version opens a new terminal when installing a patch.  
+Uses a YAD dialog to display a list of available patches and asks for confirmation. If no updates available, no window appears.  
+Intended for... **I don't know**. Someone might prefer this over `gui`.
 ```
 ~/TwistUP/twistup.sh gui-update
 ```
 ### GUI mode.  
 Uses a YAD dialog to display local version and latest version. If an update is available, this displays a Details button to install the patch.
-Intended to be launched from the Menu.
+Intended to be **launched from the Menu**.
 ```
 ~/TwistUP/twistup.sh gui
 ```
 ### GUI autostart mode.
 If updates are available, this displays a notification on the bottom-right of the screen to let you know.  
-This is run on start-up.
+Intended to be **run on start-up**.
 ```
 ~/TwistUP/twistup.sh gui-autostart
 ```
+
+## Auto updating:
+As of commit [c8e8c15](https://github.com/Botspot/TwistUP/commit/ab4a41750c26918f5753946e89d3d9b9d701d430), **TwistUP automatically keeps itself updated** whenever `patch.sh` is executed.  
+To disable this, create a file in your `~/TwistUP` folder (or `~/patcher` folder) named `no-update-patcher`. The file can be empty.
