@@ -32,7 +32,7 @@ If any patches are available, it uses a YAD dialog to display available patches 
 ```
 ~/TwistUP/twistup.sh gui-update
 ```
-### GUI mode.
+### GUI mode.  
 Uses a YAD dialog to display local version and latest version. If an update is available, this displays a Details button to install the patch.
 Intended to be launched from the Menu.
 ```
