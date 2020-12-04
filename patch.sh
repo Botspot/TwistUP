@@ -291,24 +291,29 @@ elif [ "$runmode" == 'gui-autostart' ] && [ "$latestversion" != "$localversion" 
 elif [ "$runmode" == 'gui' ];then
   #updates available or not, it doesn't matter. This will open the main dialog.
   
+  twistsite() {
+    chromium-browser https://twisteros.com
+  }
+  export -f twistsite
+  site="bash -c twistsite"
   if [ "$latestversion" != "$localversion" ];then
     updatebutton="--button=See update:0"
     updateline="--field=Update available!:LBL"
   else
-    updatebutton="--button=TwisterOS site:chromium-browser https://twisteros.com/"
+    updatebutton="--button=TwisterOS site":"bash -c twistsite"
     updateline="--field=You are up to date.:LBL"
   fi
-  
   bodytext="--field=Current version: $localversion
 Latest version: $latestversion:LBL"
   
-  yad --title='TwistUP' --form --separator='\n' \
+  yad --title='TwistUP' --form --separator='\n' --center \
     --window-icon="${DIRECTORY}/icons/logo.png" \
     --borders=4 --buttons-layout=spread --width=300 \
     "$bodytext" \
     "$updateline" \
     "$updatebutton" \
     --button="Close!${DIRECTORY}/icons/exit.png:1" || exit 0
+  unset twistsite
   update
 fi
 
