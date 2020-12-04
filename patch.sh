@@ -191,7 +191,7 @@ if [ ! -f ~/.config/autostart/twistup.desktop ];then
   echo "[Desktop Entry]
 Type=Application
 Name=TwistUP
-Comment=Initial setup for Twister OS
+Comment=Twister OS Patcher (TwistUP)
 Exec=twistpatch gui-autostart
 OnlyShowIn=XFCE;
 StartupNotify=false
@@ -233,6 +233,16 @@ echo "latest version: $latestversion"
 runmode="$1"
 if [ -z "$runmode" ];then
   runmode=gui
+fi
+
+if [ ! -f "${DIRECTORY}/no-update-patcher" ];then
+  localhash="$(git rev-parse HEAD)"
+  latesthash="$(git ls-remote https://github.com/Botspot/TwistUP HEAD | awk '{print $1}')"
+  if [ "$localhash" != "$latesthash" ] && [ ! -z "$latesthash" ] && [ ! -z "$localhash" ];then
+    echo "TwistUP is out of date. Downloading new version..."
+    gio trash "$DIRECTORY"
+    git clone https://github.com/Botspot/TwistUP "$DIRECTORY"
+  fi
 fi
 
 if [[ "$runmode" == cli* ]] || [ "$runmode" == gui-update ];then
