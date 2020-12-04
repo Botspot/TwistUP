@@ -295,7 +295,7 @@ elif [ "$runmode" == 'gui' ];then
     updatebutton="--button=See update:0"
     updateline="--field=Update available!:LBL"
   else
-    updatebutton="--button=TwisterOS site:chromium-browser"
+    updatebutton="--button=TwisterOS site:chromium-browser https://twisteros.com/"
     updateline="--field=You are up to date.:LBL"
   fi
   
