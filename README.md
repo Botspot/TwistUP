@@ -12,38 +12,44 @@ git clone https://github.com/Botspot/TwistUP
 gio trash ~/patcher
 git clone https://github.com/Botspot/TwistUP patcher
 ```
+## Enter directory:
+```
+cd ~/patcher
+#or
+cd ~/TwistUP
+```
 ## To run:
 ```
-~/TwistUP/twistup.sh
+./twistup.sh
 ```
 ## Flags:
 ### Lists available patches in the terminal and asks permission to update.
 Intended **for users who prefer patching "manually"**.
 ```
-~/TwistUP/twistup.sh cli
+./twistup.sh cli
 ```
 ### Just like above, but automatically applies the patch.
 Intended to be **used in non-interactive scripts**.
 ```
-~/TwistUP/twistup.sh cli-yes
+./twistup.sh cli-yes
 ```
 ### GUI Update mode.
 Uses a YAD dialog to display a list of available patches and asks for confirmation. If no updates available, no window appears.  
 Intended for... **I don't know**. Someone might prefer this over `gui`.
 ```
-~/TwistUP/twistup.sh gui-update
+./twistup.sh gui-update
 ```
 ### GUI mode.
 Uses a YAD dialog to display local version and latest version. If an update is available, this displays a Details button to install the patch.
 Intended to be **launched from the Menu**.
 ```
-~/TwistUP/twistup.sh gui
+./twistup.sh gui
 ```
 ### GUI autostart mode.
 If updates are available, this displays a notification on the bottom-right of the screen to let you know.  
 Intended to be **run on start-up**.
 ```
-~/TwistUP/twistup.sh gui-autostart
+./twistup.sh gui-autostart
 ```
 
 ## Auto updating:
