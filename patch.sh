@@ -121,10 +121,11 @@ update() {
     script="wget "\""$URL"\"" -O $(pwd)/patch.run
       chmod +x $(pwd)/patch.run
       $(pwd)/patch.run --noexec --target $(pwd)/patch
-      cat $(pwd)/patch/*patchinstall.sh | grep -vE 'reboot|sleep|restart|clear|seconds' > $(pwd)/patch/twistup-patchinstall.sh
+      cat $(pwd)/patch/*patchinstall.sh | grep -vE 'reboot|restart|clear' > $(pwd)/patch/twistup-patchinstall.sh
       chmod +x $(pwd)/patch/twistup-patchinstall.sh
       cd $(pwd)/patch/
-      $(pwd)/patch/twistup-patchinstall.sh"
+      $(pwd)/patch/twistup-patchinstall.sh
+      echo -e '\e[42mPatching complete.\e[49m'"
   elif [[ "$URL" = *.zip ]];then
     echo "Patch is in .zip format."
     rm -f ./*patchinstall.sh 2>/dev/null
