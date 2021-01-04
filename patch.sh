@@ -140,7 +140,7 @@ update() {
   #install
   if [[ "$runmode" == gui* ]];then
     echo "Running in a terminal."
-    x-terminal-emulator -e /bin/bash -c "trap 'echo '\''Close this terminal to exit.'\'' ; sleep infinity' EXIT
+    "$DIRECTORY/terminal-run" "trap 'echo '\''Close this terminal to exit.'\'' ; sleep infinity' EXIT
       cd "\""$DIRECTORY"\""
       $script
       yad --title='Twister OS Patcher' \
@@ -148,7 +148,6 @@ update() {
       --window-icon="\""${DIRECTORY}/icons/logo.png"\"" \
       --button="\""Reboot!${DIRECTORY}/icons/power.png"\"":0 \
       --button="\""Later!${DIRECTORY}/icons/exit.png"\"":1 && sudo reboot"
-    #x-terminal-emulator -e "bash -c 'echo y | "./${dashpatch}patchinstall.sh"'"
   else
     #if already running in cli mode, don't open another terminal
     bash -c "$script"
