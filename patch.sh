@@ -121,7 +121,7 @@ update() {
     script="wget "\""$URL"\"" -O $(pwd)/patch.run
       chmod +x $(pwd)/patch.run
       $(pwd)/patch.run --noexec --target $(pwd)/patch
-      cat $(pwd)/patch/*patchinstall.sh | grep -vE 'reboot|restart|clear' > $(pwd)/patch/twistup-patchinstall.sh
+      cat $(pwd)/patch/*patchinstall.sh | grep -vE ' reboot| restart|clear' > $(pwd)/patch/twistup-patchinstall.sh
       chmod +x $(pwd)/patch/twistup-patchinstall.sh
       cd $(pwd)/patch/
       $(pwd)/patch/twistup-patchinstall.sh
