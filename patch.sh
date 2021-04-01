@@ -190,7 +190,7 @@ fi
 if [ ! -f ~/.config/autostart/twistup.desktop ];then
   echo "[Desktop Entry]
 Type=Application
-Name=TwistUP
+Name=TwistUP-UI
 Comment=Twister UI Patcher (TwistUP)
 Exec=twistpatch gui-autostart
 OnlyShowIn=XFCE;
@@ -239,7 +239,7 @@ if [ ! -f "${DIRECTORY}/no-update-patcher" ];then
   localhash="$(git rev-parse HEAD)"
   latesthash="$(git ls-remote https://github.com/phoenixbyrd/TwistUP-UI HEAD | awk '{print $1}')"
   if [ "$localhash" != "$latesthash" ] && [ ! -z "$latesthash" ] && [ ! -z "$localhash" ];then
-    echo "TwistUP is out of date. Downloading new version..."
+    echo "TwistUP-UI is out of date. Downloading new version..."
     gio trash "$DIRECTORY"
     git clone https://github.com/phoenixbyrd/TwistUP-UI "$DIRECTORY"
   fi
@@ -263,7 +263,7 @@ elif [ "$runmode" == 'gui-autostart' ] && [ "$latestversion" != "$localversion" 
   fi
   
   if [ "$nextcheck" == 'never' ];then
-    echo "${DIRECTORY}/nextcheck prevents TwistUP from ever checking for updates. Goodbye!"
+    echo "${DIRECTORY}/nextcheck prevents TwistUP-UI from ever checking for updates. Goodbye!"
     exit 0
   fi
   
@@ -316,7 +316,7 @@ elif [ "$runmode" == 'gui' ];then
   bodytext="--field=Current version: $localversion
 Latest version: $latestversion:LBL"
   
-  yad --title='TwistUP' --form --separator='\n' --center \
+  yad --title='TwistUP-UI' --form --separator='\n' --center \
     --window-icon="${DIRECTORY}/icons/logo.png" \
     --borders=4 --buttons-layout=spread --width=300 \
     "$bodytext" \
