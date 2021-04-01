@@ -144,7 +144,7 @@ update() {
     "$DIRECTORY/terminal-run" "trap 'echo '\''Close this terminal to exit.'\'' ; sleep infinity' EXIT
       cd "\""$DIRECTORY"\""
       $script
-      yad --title='Twister OS Patcher' \
+      yad --title='Twister UI Patcher' \
       --text="\""$patch patch complete. Reboot now?"\"" \
       --window-icon="\""${DIRECTORY}/icons/logo.png"\"" \
       --button="\""Reboot!${DIRECTORY}/icons/power.png"\"":0 \
@@ -191,7 +191,7 @@ if [ ! -f ~/.config/autostart/twistup.desktop ];then
   echo "[Desktop Entry]
 Type=Application
 Name=TwistUP
-Comment=Twister OS Patcher (TwistUP)
+Comment=Twister UI Patcher (TwistUP)
 Exec=twistpatch gui-autostart
 OnlyShowIn=XFCE;
 StartupNotify=false
@@ -281,7 +281,7 @@ elif [ "$runmode" == 'gui-autostart' ] && [ "$latestversion" != "$localversion" 
   screen_width="$(xdpyinfo | grep 'dimensions:' | tr 'x' '\n' | tr ' ' '\n' | sed -n 7p)"
   screen_height="$(xdpyinfo | grep 'dimensions:' | tr 'x' '\n' | tr ' ' '\n' | sed -n 8p)"
   
-  output="$(yad --form --text='Twister OS can be updated.' \
+  output="$(yad --form --text='Twister UI can be updated.' \
     --on-top --skip-taskbar --undecorated --close-on-unfocus \
     --geometry=260+$((screen_width-262))+$((screen_height-150)) \
     --field="Never show this again:CHK" --image="${DIRECTORY}/icons/logo.png" \
