@@ -212,7 +212,7 @@ fi
 localversion="$(twistver | awk 'NF>1{print $NF}')"
 echo "current version: $localversion"
 
-patchlist="$(wget -qO- https://twisteros.com/Patches/URLs)"
+patchlist="$(wget -qO- https://twisteros.com/Patches/URLsUI)"
 if [ $? != 0 ] || [ -z "$patchlist" ];then
   error "Failed to download the patch list! Are you connected to the Internet?"
 fi
