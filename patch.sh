@@ -24,7 +24,7 @@ getchangelog() {
   #downloads the changelog for a specified patch.
   #usage: getchangelog 1.9.1
   #outputs the full changelog in plain-text
-  messagetxt="$(wget -qO- https://twisteros.com/Patches/message.txt)"
+  messagetxt="$(wget -qO- https://twisteros.com/Patches/messageUI.txt)"
   changelog="$(echo "$messagetxt" | sed -e "0,/Version $1 patch notes:/d" | sed -e "/patch notes:/q" | head -n -2)"
   firstline="$(echo "$messagetxt" | grep "Version $1 patch notes:")"
   echo -e "${firstline}\n${changelog}"
@@ -44,7 +44,7 @@ patch2url() {
   #get URL to download, when given a patch number
   #usage: patch2url 1.9.1
   #outputs the full URL to the patch
-  URL="$(wget -qO- https://twisteros.com/Patches/URLs | grep "$1" | awk '{print $2}')"
+  URL="$(wget -qO- https://twisteros.com/Patches/URLsUI | grep "$1" | awk '{print $2}')"
   if [ $? != 0 ] || [ -z "$URL" ];then
     error "Failed to determine URL for patch ${1}!"
   fi
