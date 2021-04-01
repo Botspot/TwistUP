@@ -237,11 +237,11 @@ fi
 
 if [ ! -f "${DIRECTORY}/no-update-patcher" ];then
   localhash="$(git rev-parse HEAD)"
-  latesthash="$(git ls-remote https://github.com/phoenixbyrd/TwistUP HEAD | awk '{print $1}')"
+  latesthash="$(git ls-remote https://github.com/phoenixbyrd/TwistUP-UI HEAD | awk '{print $1}')"
   if [ "$localhash" != "$latesthash" ] && [ ! -z "$latesthash" ] && [ ! -z "$localhash" ];then
     echo "TwistUP is out of date. Downloading new version..."
     gio trash "$DIRECTORY"
-    git clone https://github.com/phoenixbyrd/TwistUP "$DIRECTORY"
+    git clone https://github.com/phoenixbyrd/TwistUP-UI "$DIRECTORY"
   fi
 fi
 
