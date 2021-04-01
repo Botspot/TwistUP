@@ -79,8 +79,8 @@ update() {
     echo "This patch will be applied now: $patch"
   elif [[ "$runmode" == gui* ]];then
     while true;do
-      echo "$availablepatches" | yad --title='Twister OS Patcher' --list --separator='\n' \
-        --text='The following Twister OS patches are available:' \
+      echo "$availablepatches" | yad --title='Twister UI Patcher' --list --separator='\n' \
+        --text='The following Twister UI patches are available:' \
         --window-icon="${DIRECTORY}/icons/logo.png" \
         --column=Patch --no-headers --no-selection --borders=4 --text-align=left --buttons-layout=spread --width=372 \
         --button="$patch Details"!"${DIRECTORY}/icons/info.png"!"View the changelog of the $patch patch.":2 \
@@ -248,7 +248,7 @@ fi
 if [[ "$runmode" == cli* ]] || [ "$runmode" == gui-update ];then
   if [ "$latestversion" == "$localversion" ];then
     #no update available
-    echo -e "\nYour version of Twister OS is fully up to date already.\nExiting now."
+    echo -e "\nYour version of Twister UI is fully up to date already.\nExiting now."
     exit 0
   elif [ "$latestversion" != "$localversion" ];then
     #update is available
