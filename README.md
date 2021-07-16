@@ -5,12 +5,12 @@ AKA TwisterOS Patcher 2.0!
 
 ## To download to ~/TwistUP 
 ```
-git clone https://github.com/Botspot/TwistUP
+git clone https://github.com/phoenixbyrd/TwistUP-UI.git
 ```
 ## To download to ~/patcher
 ```
 gio trash ~/patcher
-git clone https://github.com/Botspot/TwistUP patcher
+git clone https://github.com/phoenixbyrd/TwistUP-UI.git patcher
 ```
 ## Enter directory:
 ```
@@ -20,36 +20,36 @@ cd ~/TwistUP
 ```
 ## To run:
 ```
-./twistup.sh
+./patch.sh
 ```
 ## Flags:
 ### Lists available patches in the terminal and asks permission to update.
 Intended **for users who prefer patching "manually"**.
 ```
-./twistup.sh cli
+./patch.sh cli
 ```
 ### Just like above, but automatically applies the patch.
 Intended to be **used in non-interactive scripts**.
 ```
-./twistup.sh cli-yes
+./patch.sh cli-yes
 ```
 ### GUI Update mode.
 Uses a YAD dialog to display a list of available patches and asks for confirmation. If no updates available, no window appears.  
 Intended for... **I don't know**. Someone might prefer this over `gui`.
 ```
-./twistup.sh gui-update
+./patch.sh gui-update
 ```
 ### GUI mode.
 Uses a YAD dialog to display local version and latest version. If an update is available, this displays a Details button to install the patch.
 Intended to be **launched from the Menu**.
 ```
-./twistup.sh gui
+./patch.sh gui
 ```
 ### GUI autostart mode.
 If updates are available, this displays a notification on the bottom-right of the screen to let you know.  
 Intended to be **run on start-up**.
 ```
-./twistup.sh gui-autostart
+./patch.sh gui-autostart
 ```
 
 ## Auto updating:
