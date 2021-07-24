@@ -10,6 +10,9 @@
 
 #twistver format: "Twister OS version 1.8.5"
 
+#pull updates.
+git pull
+
 DIRECTORY="$(dirname "$(readlink -f "$0")")"
 echo "$DIRECTORY"
 function error {
