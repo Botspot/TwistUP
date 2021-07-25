@@ -244,7 +244,9 @@ if [ ! -f "${DIRECTORY}/no-update-patcher" ];then
   if [ "$localhash" != "$latesthash" ] && [ ! -z "$latesthash" ] && [ ! -z "$localhash" ];then
     echo "TwistUP-UI is out of date. Downloading new version..."
     gio trash "$DIRECTORY"
+    cd "$HOME"
     git clone https://github.com/phoenixbyrd/TwistUP-UI "$DIRECTORY"
+    cd "$DIRECTORY"
   fi
 fi
 
